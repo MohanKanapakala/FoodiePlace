@@ -3,6 +3,8 @@ import { Link, Route, Routes, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { MdAccountCircle } from "react-icons/md";
 import { logoutUser, clearCart } from "./store";
+import { setSearchTerm } from "./store";
+
 
 import Home from "./Home";
 import Veg from "./Veg";
@@ -41,7 +43,11 @@ function App() {
             </div>
 
             <div className="search-bar">
-              <input type="text" placeholder="Search for items..." />
+              <input
+                type="text"
+                placeholder="Search for items..."
+                onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+              />
             </div>
 
             <div className="nav-actions">

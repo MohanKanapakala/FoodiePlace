@@ -7,41 +7,58 @@ import { toast, ToastContainer } from "react-toastify";
 
 function Bakery() {
   const dispatch = useDispatch();
+
   const { bakeryItems, loading, error } = useSelector(
     (state) => state.products
   );
 
+  const searchTerm = useSelector((state) => state.search.term);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
+  // ✅ Fetch products
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  // ✅ Reset page on search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // ✅ SEARCH FIRST
+  const filteredBakeryItems = bakeryItems.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) return <h2>Loading Bakery Items...</h2>;
   if (error) return <h2>Error: {error}</h2>;
-  if (!bakeryItems.length) return <h3>No Bakery Items Found</h3>;
+  if (!filteredBakeryItems.length)
+    return <h3>No matching Bakery Items found 🍔</h3>;
 
-  // total pages
-  const totalPages = Math.ceil(bakeryItems.length / itemsPerPage);
+  // ✅ PAGINATION AFTER SEARCH
+  const totalPages = Math.ceil(filteredBakeryItems.length / itemsPerPage);
 
-  // Calculate items to show
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = bakeryItems.slice(indexOfFirstItem, indexOfLastItem);
 
-  //  Prepare the list here (outside return)
+  const currentItems = filteredBakeryItems.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  // ✅ Bakery list
   const bakeryListItems = currentItems.map((product) => (
     <li key={product.id}>
-      <img src={product.imgUrl} alt="no image" />
+      <img src={product.imgUrl} alt={product.name} />
       <h3>{product.name}</h3>
-      <strong>Rs.{product.price}</strong>
+      <strong>₹{product.price}</strong>
       <p>{product.description}</p>
       <button
-        type="button"
         onClick={() => {
           dispatch(addToCart(product));
-          toast.success(`Product ${product.name} added to cart successfully!`);
+          toast.success(`${product.name} added to cart 🛒`);
         }}
       >
         Add To Cart
@@ -49,7 +66,7 @@ function Bakery() {
     </li>
   ));
 
-  //  Prepare pagination buttons here
+  // ✅ Pagination buttons
   const paginationButtons = Array.from({ length: totalPages }, (_, index) => (
     <button
       key={index + 1}
@@ -66,14 +83,16 @@ function Bakery() {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={2000} />
+
       <div className="bakery-container">
-        <ToastContainer position="top-right" autoClose={2000}></ToastContainer>
         <h1 className="bakery-head">
-          🍔<span> Bakery Items ...</span>
+          🍔 <span>Bakery Items</span>
         </h1>
-        {/* Use the prepared list */}
+
         <ul className="item mt-5">{bakeryListItems}</ul>
-        {/* Use the prepared pagination */}
+
+        {/* Pagination */}
         <div
           style={{
             marginTop: "20px",
@@ -85,10 +104,9 @@ function Bakery() {
           <button
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            style={{ margin: "5px" }}
             className="previous-button"
           >
-            ⏪Prev
+            ⏪ Prev
           </button>
 
           <div>{paginationButtons}</div>
@@ -98,7 +116,7 @@ function Bakery() {
             disabled={currentPage === totalPages}
             className="next-button"
           >
-            Next⏩
+            Next ⏩
           </button>
         </div>
       </div>

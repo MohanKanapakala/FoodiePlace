@@ -6,44 +6,56 @@ import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 
 function Veg() {
-  // let vegItems = useSelector((globalState) => globalState.products.vegItems);
+  const dispatch = useDispatch();
+
   const { vegItems, loading, error } = useSelector((state) => state.products);
-  let dispatch = useDispatch();
+
+  const searchTerm = useSelector((state) => state.search.term);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // ✅ Fetch veg items from backend on mount
+  // ✅ Fetch products
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  
+  // ✅ Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  // ✅ SEARCH (filter first)
+  const filteredVegItems = vegItems.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // ✅ PAGINATION (after filtering)
+  const totalPages = Math.ceil(filteredVegItems.length / itemsPerPage);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const currentItems = filteredVegItems.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
   if (loading) return <h2>Loading Veg Items...</h2>;
   if (error) return <h2>Error: {error}</h2>;
-  if (!vegItems.length) return <h3>No Veg Items Found</h3>;
+  if (!filteredVegItems.length) return <h3>No matching Veg Items found 😞</h3>;
 
-  // total pages
-  const totalPages = Math.ceil(vegItems.length / itemsPerPage);
-
-  // Calculate items to show
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = vegItems.slice(indexOfFirstItem, indexOfLastItem);
-
-  //  Prepare the list here (outside return)
+  // ✅ Render items
   const vegListItems = currentItems.map((product) => (
     <li key={product.id}>
       <img src={product.imgUrl} alt="no image" />
       <h3>{product.name}</h3>
-      <strong>Rs.{product.price}</strong>
+      <strong>₹{product.price}</strong>
       <p>{product.description}</p>
       <button
-        type="button"
         onClick={() => {
           dispatch(addToCart(product));
-          toast.success(`Product ${product.name} added to cart successfully!`);
+          toast.success(`${product.name} added to cart 🛒`);
         }}
       >
         Add To Cart
@@ -51,16 +63,15 @@ function Veg() {
     </li>
   ));
 
-  //  Prepare pagination buttons here
+  // ✅ Pagination buttons
   const paginationButtons = Array.from({ length: totalPages }, (_, index) => (
     <button
       key={index + 1}
       onClick={() => setCurrentPage(index + 1)}
+      className="pagenation-buttons"
       style={{
-        margin: "5px",
         fontWeight: currentPage === index + 1 ? "bold" : "normal",
       }}
-      className="pagenation-buttons"
     >
       {index + 1}
     </button>
@@ -68,14 +79,16 @@ function Veg() {
 
   return (
     <>
+      <ToastContainer position="top-right" autoClose={2000} />
+
       <div className="veg-container">
-        <ToastContainer position="top-right" autoClose={2000}></ToastContainer>
         <h1 className="veg-head">
-          🥗<span>Veg Items ...</span>
+          🥗 <span>Veg Items</span>
         </h1>
-        {/* Use the prepared list */}
+
         <ul className="item mt-5">{vegListItems}</ul>
-        {/* Use the prepared pagination */}
+
+        {/* Pagination */}
         <div
           style={{
             marginTop: "20px",
@@ -87,10 +100,9 @@ function Veg() {
           <button
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 1}
-            style={{ margin: "5px" }}
             className="previous-button"
           >
-            ⏪Prev
+            ⏪ Prev
           </button>
 
           <div>{paginationButtons}</div>
@@ -100,7 +112,7 @@ function Veg() {
             disabled={currentPage === totalPages}
             className="next-button"
           >
-            Next⏩
+            Next ⏩
           </button>
         </div>
       </div>

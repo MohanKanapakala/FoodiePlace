@@ -173,6 +173,26 @@ const authSlice = createSlice({
 });
 export const { registerUser, loginUser, logoutUser } = authSlice.actions;
 
+
+/* Search bar slice */
+const searchSlice = createSlice({
+  name: "search",
+  initialState: {
+    term: "",
+  },
+  reducers: {
+    setSearchTerm: (state, action) => {
+      state.term = action.payload.toLowerCase();
+    },
+    clearSearchTerm: (state) => {
+      state.term = "";
+    },
+  },
+});
+
+export const { setSearchTerm, clearSearchTerm } = searchSlice.actions;
+
+
 /* ------------------- STORE CONFIGURATION ------------------- */
 const store = configureStore({
   reducer: {
@@ -180,6 +200,7 @@ const store = configureStore({
     cart: cartSlice.reducer,
     orders: ordersSlice.reducer,
     authentication: authSlice.reducer,
+    search: searchSlice.reducer,
   },
 });
 
