@@ -5,7 +5,7 @@ import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import "./Home.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { motion } from "framer-motion";
+import { color, motion } from "framer-motion";
 
 function Home() {
   // ✅ First carousel (food items slider)
@@ -306,7 +306,18 @@ function Home() {
                     alt={cat.name}
                     className="category-image"
                   />
-                  <h3>{cat.name}</h3>
+                  <h4>
+                    <strong
+                      style={{
+                        color: "#ff0000d0",
+                        textTransform: "uppercase",
+                        textDecoration:"none",
+                        textShadow: "1px 1px 3px rgba(0,0,0,0.3)",
+                      }}
+                    >
+                      {cat.name}
+                    </strong>
+                  </h4>
                 </div>
               </Link>
             </div>
